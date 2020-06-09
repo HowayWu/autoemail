@@ -1,0 +1,179 @@
+import csv 
+import pandas as pd
+import smtplib 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.header import Header
+
+class object_input:
+# 构建一个类，用于封装需要填入的信息。
+# 输出一条信息形成一个列表，用main()方法调用
+    def __init__(self):
+
+        self.state = int(input(
+            '输入当前候选人的状态：\n'
+            '1：初试\n'
+            '2：复试'
+        ))
+        self.general_department = '厦门智慧系统事业群'  ##默认一级部门为厦门智慧系统事业群
+        self.second_department = int(input(
+            '请选择二级部门\n'
+            '1：安防系统事业部\n'
+            '2：时间管理系统事业部\n'
+            '3：生物识别证卡系统事业部\n'
+            '4：BioCV及行业解决方案部\n'
+            '5：测试中心\n'
+            '6：算法实验室\n'
+            '7：直接填入其他部门'
+        ))
+        self.third_department = int(input(
+            '请选择三级部门\n'
+            '1：中国区\n'
+            '2：国际部\n'
+            '3：输入其他\n'
+        ))
+        self.name_position = input('请输入发布岗位名称：')
+
+        self.channel = int(input(
+            '请选择招聘渠道\n'
+            '1：BOSS直聘\n'
+            '2：前程无忧\n'
+            '3：内部推荐\n'
+        ))
+        self.name=input('输入候选人姓名')
+        self.time_resume = input('输入简历时间')
+        self.time_preliminary = input('输入初试时间')
+        self.time_second = input('输入复试时间')
+
+
+        self.rows=[]
+
+    def function_state(self):
+        ##构建状态方法
+        list_state=['初试', '复试']
+        parameter_state=list_state[self.state - 1]
+        self.rows.append(parameter_state)
+
+    def function_general_department(self):
+        ##构建一级部门方法
+        self.rows.append(self.general_department)
+
+    def function_second_department(self):
+        ##构建二级部门方法
+        list_second_department = ['安防系统事业部',
+                                  '时间管理系统事业部',
+                                  '生物识别证卡系统事业部',
+                                  'BioCV及行业解决方案部',
+                                  '测试中心',
+                                  '算法实验室'
+                                  '直接填入其他部门']
+        parameter_second_department=list_second_department[self.second_department - 1]
+        self.rows.append(parameter_second_department)
+
+    def function_third_department(self):
+        ##构建三级部门方法
+        list_third_department=[
+                               '中国区',
+                               '国际部',
+                               '其他',
+                               ]
+        parameter_third_department = list_third_department[self.third_department - 1]
+        self.rows.append(parameter_third_department)
+
+    def function_name_position(self):
+        ##构建发布岗位名称的方法
+        self.rows.append(self.name_position)
+
+    def function_channel(self):
+        ##构建招聘渠道方法
+        list_channel=['BOSS直聘',
+                      '前程无忧',
+                      '内部推荐'
+                      ]
+        parameter_channel = list_channel[self.channel - 1]
+        self.rows.append(parameter_channel)
+
+    def function_name(self):
+        self.rows.append(self.name)
+
+    def function_time(self):
+        self.rows.append(self.time_resume)
+        self.rows.append(self.time_preliminary)
+        self.rows.append(self.time_second)
+
+
+    def main(self):
+        self.function_state()
+        self.function_general_department()
+        self.function_second_department()
+        self.function_third_department()
+        self.function_name_position()
+        self.function_channel()
+        self.function_time()
+        self.function_name()
+        return(self.rows)
+
+#写入表头
+#with open (r'C:\Users\Administrator\Desktop\talent.csv','w') as file_header:
+    #header=['状态','一级部门','二级部门','三级部门','岗位名称','招聘渠道',
+                    #'候选人姓名','简历时间','初试时间','复试时间']
+    #info=csv.writer(file_header)
+    #info.writerow(header)
+
+
+
+class object_write:
+    #把数据写入csv表格中，并将代码封装成类
+    def function_csv(self):
+        while True:
+            ##因为要多次输入数据，因此要循环执行
+            choice=input('输入1继续，输入其他键结束')
+            if choice=='1':
+                with open (r"C:/Users/MSI/Desktop/talent.csv",'a') as file_content:
+                    a=object_input()
+                    info_content=csv.writer(file_content)
+                    info_content.writerow(a.main())
+            else:
+                break
+
+class object_delete:
+    #在有需要的时候删除某一行
+    def __init__(self):
+        with open (r'C:/Users/MSI/Desktop/talent.csv','r',encoding='gbk') as file_in:
+            reader_content=csv.reader(file_in)
+            for row in reader_content:
+                print(row)
+    def function_delete(self):
+        data=pd.read_csv(r'C:/Users/MSI/Desktop/talent.csv',encoding='gbk')
+        choice_delete=int(input('选择要删除的数据行'))
+        data_new=data.drop(choice_delete-1)
+        data_new.to_csv(r'C:/Users/MSI/Desktop/talent_new.csv',index=0)     
+
+
+
+class object_mail:
+    ## 连接和登录
+    con=smtplib.SMTP_SSL('smtp.163.com',465)
+    con.login('howaywu@163.com','FUKSKMTYAMWQSCVM')
+
+    msg = MIMEMultipart()
+
+    msg['Subject']=Header('工作日报','utf-8').encode()
+    msg['From']='howaywu@163.com <howaywu@163.com>'
+    msg['To']='410407010@qq.com'
+
+    ## 准备内容
+    content1=open(r'C:/Users/MSI/Desktop/talent_new.csv','rb').read()
+    file1 = MIMEText(content1,'base64','utf-8') ### 配置相关参数
+    file1['Content-Disposition']='attachment;filename=talent.csv'
+    msg.attach(file1)
+
+    file2 = MIMEText('工作日志内容及附件','plain','utf-8')
+    msg.attach(file2)
+
+    ## 发送邮件
+    con.sendmail('howaywu@163.com','410407010@qq.com',msg.as_string())
+    con.quit()
+
+
+a=object_mail()
